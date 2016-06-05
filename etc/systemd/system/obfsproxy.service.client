@@ -1,0 +1,15 @@
+[Unit]
+Description=obfuscating proxy client
+After=network.target
+
+[Service]
+Type=simple
+#ExecStart=/usr/bin/python2 /usr/bin/obfsproxy --log-file=/var/log/obfsproxy.log --log-min-severity=info obfs2 --shared-secret=bMDPQVk5mzgvumI6dH10rZCHM2lPnpBw3b2OiK socks 127.0.0.1:10194
+ExecStart=/usr/bin/python2 /usr/bin/obfsproxy --log-file=/var/log/obfsproxy.log --log-min-severity=info obfs3 socks 127.0.0.1:10194
+
+ExecReload=/usr/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
+

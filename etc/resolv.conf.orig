@@ -1,0 +1,10 @@
+# This file is managed by systemd-resolved(8). Do not edit.
+#
+# Third party programs must not access this file directly, but
+# only through the symlink at /etc/resolv.conf. To manage
+# resolv.conf(5) in a different way, replace the symlink by a
+# static file or a different symlink.
+
+nameserver 194.8.253.11
+nameserver 194.8.252.1
+nameserver 8.8.8.8

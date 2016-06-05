@@ -1,0 +1,29 @@
+client
+dev tun0
+nobind
+persist-key
+persist-tun
+
+route 192.168.1.0 255.255.255.0 192.168.1.1
+
+remote 12.34.56.78 443
+proto tcp-client
+comp-lzo
+
+ca /root/ovpn/banana/ca.crt
+cert /root/ovpn/banana/banana.crt
+key /root/ovpn/banana/banana.key
+tls-auth /root/ovpn/banana/ta.key 1
+
+cipher AES-256-CBC
+auth SHA512
+tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-128-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-128-CBC-SHA
+tls-version-min 1.2
+remote-cert-tls server
+verify-x509-name myhostname name
+tls-client
+
+log /var/log/openvpn.log
+status openvpn-status.log
+verb 4
+
