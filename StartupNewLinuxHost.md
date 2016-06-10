@@ -57,7 +57,7 @@ Put the following into a script, e. g. `/root/iptables-revoke.sh`
 
 Make the script executable, `chmod u+x /root/iptables-revoke.sh`
 ```
-\#!/bin/sh
+#!/bin/bash
 
 iptables -F
 
@@ -106,9 +106,9 @@ Put the following into a script, e. g. `/root/iptables-install.sh`.
 
 Make the script executable, `chmod u+x /root/iptables-install.sh`
 ```
-\#!/bin/bash
+#!/bin/bash
 
-\# set policies to accept
+# set policies to accept
 
 iptables -P INPUT ACCEPT
 
@@ -116,7 +116,7 @@ iptables -P FORWARD ACCEPT
 
 iptables -P OUTPUT ACCEPT
 
-\# clean iptables
+# clean iptables
 
 iptables -F
 
@@ -126,7 +126,7 @@ iptables -X
 
 iptables -t nat -X
 
-\# allow localhost
+# allow localhost
 
 iptables -A INPUT -i lo -j ACCEPT
 
@@ -134,19 +134,19 @@ iptables -A INPUT ! -i lo -s 127.0.0.0/8 -j REJECT
 
 iptables -A OUTPUT -o lo -j ACCEPT
 
-\# allow SSH
+# allow SSH
 
 iptables -A INPUT -i eth0 -p tcp -m state --state NEW,ESTABLISHED --dport 1022 -j ACCEPT
 
 iptables -A OUTPUT -o eth0 -p tcp -m state --state NEW,ESTABLISHED --sport 1022 -j ACCEPT
 
-\# if you are now connected via port 22
+# if you are now connected via port 22
 
 iptables -A INPUT -i eth0 -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
 
 iptables -A OUTPUT -o eth0 -p tcp -m state --state NEW,ESTABLISHED --sport 22 -j ACCEPT
 
-\# block everything else
+# block everything else
 
 iptables -P INPUT DROP
 
