@@ -17,11 +17,13 @@ pacman -Syu
 
 if you want to install everything right away from here, use
 
+```
 pacman -Syu at knockd openvpn easy-rsa tor privoxy obfsproxy git
 
 sync
 
 systemctl reboot
+```
 
 <span id="anchor-6"></span><span id="anchor-7"></span><span id="anchor-6"></span>iptables (v4)
 ==============================================================================================
@@ -29,28 +31,32 @@ systemctl reboot
 <span id="anchor-8"></span><span id="anchor-9"></span><span id="anchor-8"></span>Install at 
 --------------------------------------------------------------------------------------------
 
+```
 pacman -S at
 
 systemctl start atd
 
 systemctl enable atd
+```
 
 <span id="anchor-10"></span><span id="anchor-11"></span><span id="anchor-10"></span>Set up nano
 -----------------------------------------------------------------------------------------------
 
-nano ~/.nanorc
+`nano ~/.nanorc`
+```
 
 set nowrap
 
 set rebindkeypad
+```
 
 <span id="anchor-12"></span><span id="anchor-13"></span><span id="anchor-12"></span>Set up iptable revoke script
 ----------------------------------------------------------------------------------------------------------------
 
-Put the following into a script, e. g. */root/iptables-revoke.sh*
+Put the following into a script, e. g. `/root/iptables-revoke.sh`
 
-Make the script executable, *chmod u+x /root/iptables-revoke.sh*
-
+Make the script executable, `chmod u+x /root/iptables-revoke.sh`
+```
 \#!/bin/sh
 
 iptables -F
@@ -74,12 +80,14 @@ iptables -P INPUT ACCEPT
 iptables -P FORWARD ACCEPT
 
 iptables -P OUTPUT ACCEPT
+```
 
-chmod +x iptables-revoke.sh
+`chmod +x iptables-revoke.sh`
 
 <span id="anchor-14"></span><span id="anchor-15"></span><span id="anchor-14"></span>Test the revoke script
 ----------------------------------------------------------------------------------------------------------
 
+```
 iptables -S
 
 iptables -P FORWARD DROP
@@ -89,14 +97,15 @@ iptables -S
 ./iptables-revoke.sh
 
 iptables -S
+```
 
 <span id="anchor-16"></span><span id="anchor-17"></span><span id="anchor-16"></span>Set up (basic) iptables (v4)
 ----------------------------------------------------------------------------------------------------------------
 
-Put the following into a script, e. g. */root/iptables-install.sh*.
+Put the following into a script, e. g. `/root/iptables-install.sh`.
 
-Make the script executable, *chmod u+x /root/iptables-install.sh*
-
+Make the script executable, `chmod u+x /root/iptables-install.sh`
+```
 \#!/bin/bash
 
 \# set policies to accept
@@ -146,10 +155,11 @@ iptables -P FORWARD DROP
 iptables -P OUTPUT DROP
 
 chmod +x iptables-install.sh
+```
 
 <span id="anchor-18"></span><span id="anchor-19"></span><span id="anchor-18"></span>Test at
 -------------------------------------------------------------------------------------------
-
+```
 iptables -S
 
 iptables -P FORWARD DROP
@@ -159,43 +169,43 @@ iptables -S
 at now +1 min
 
 /root/iptables-revoke.sh
-
+```
 *&lt;ctrl-d&gt;*
 
 wait 1 minute
 
-iptables -S
+`iptables -S`
 
 <span id="anchor-20"></span><span id="anchor-21"></span><span id="anchor-20"></span>Set up iptables and let at have your ass
 ----------------------------------------------------------------------------------------------------------------------------
-
+```
 at now +3 min
 
 /root/iptables-revoke.sh
-
+```
 *&lt;ctrl-d&gt;*
-
+```
 /root/iptables-install.sh
-
+```
 If SSH still reacts, you have a first green light. From a second terminal, try to login to the same server via SSH. If it works, you have a second green lights. Upon two green lights:
 
-atq
+`atq`
 
 note the job number
 
-atrm &lt;job number&gt;
+`atrm <job number>`
 
 If it the shell does not react and you cannot login from a second terminal, wait for 3 minutes. atd will run the iptables-revoke script, and you should be able to login again.
 
 <span id="anchor-22"></span><span id="anchor-23"></span><span id="anchor-22"></span>Start and enable iptables (v4) service
 --------------------------------------------------------------------------------------------------------------------------
-
-iptables-save &gt; /etc/iptables/iptables.rules
+```
+iptables-save > /etc/iptables/iptables.rules
 
 systemctl start iptables.service
 
 systemctl enable.iptables.service
-
+```
 <span id="anchor-24"></span><span id="anchor-25"></span><span id="anchor-24"></span>Disable ipv6
 ================================================================================================
 
