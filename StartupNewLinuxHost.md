@@ -214,30 +214,34 @@ Attention. I was using IPv4 while connecting to my server. If you use IPv6, then
 <span id="anchor-26"></span><span id="anchor-27"></span><span id="anchor-26"></span>iptables (v6)
 -------------------------------------------------------------------------------------------------
 
-ip***6***tables -P INPUT DROP
+```
+ip6tables -P INPUT DROP
 
-ip***6***tables -P FORWARD DROP
+ip6tables -P FORWARD DROP
 
-ip***6***tables -P OUTPUT DROP
+ip6tables -P OUTPUT DROP
 
-ip***6***tables-save &gt; /etc/iptables/ip***6***tables.rules
+ip6tables-save &gt; /etc/iptables/ip6tables.rules
 
-systemctl start ip***6***tables.service
+systemctl start ip6tables.service
 
-systemctl enable ip***6***tables.service
+systemctl enable ip6tables.service
+
+```
 
 <span id="anchor-28"></span><span id="anchor-29"></span><span id="anchor-28"></span>/etc/hosts
 ----------------------------------------------------------------------------------------------
 
-nano /etc/hosts
+`nano /etc/hosts`
 
 comment out ::1 line
 
-\# ::1 localhost…
+`# ::1 localhost…`
 
 <span id="anchor-30"></span><span id="anchor-31"></span><span id="anchor-30"></span>disable IPv6 in kernel
 ----------------------------------------------------------------------------------------------------------
 
+```
 nano /etc/sysctl.d/40-ipv6.conf
 
 net.ipv6.conf.all.disable\_ipv6=1
@@ -247,14 +251,18 @@ net.ipv6.conf.default.disable\_ipv6=1
 net.ipv6.conf.lo.disable\_ipv6=1
 
 net.ipv6.conf.eth0.disable\_ipv6=1
+```
 
 then
 
+```
 sysctl --system
+```
 
 <span id="anchor-32"></span><span id="anchor-33"></span><span id="anchor-32"></span>Add users
 =============================================================================================
 
+```
 useradd -d /home/user1 -m -s /bin/bash user1
 
 passwd user1
@@ -266,6 +274,7 @@ passwd l0g1nb4ck00p
 useradd --system --shell /usr/sbin/nologin --no-create-home openvpn\_server
 
 useradd --system --shell /usr/sbin/nologin --no-create-home obfsproxy
+```
 
 <span id="anchor-34"></span><span id="anchor-35"></span><span id="anchor-34"></span>Configure SSH
 =================================================================================================
@@ -273,13 +282,16 @@ useradd --system --shell /usr/sbin/nologin --no-create-home obfsproxy
 <span id="anchor-36"></span><span id="anchor-37"></span><span id="anchor-36"></span>Generate host keys
 ------------------------------------------------------------------------------------------------------
 
+```
 ssh-keygen -t rsa -b 8192 -a 23 -C “root@myhostname” -f /etc/ssh/ssh\_host\_rsa\_key -N ‘’
 
 ssh-keygen -t ed25519 -b 521 -a 64 -C “root@myhostname” -f /etc/ssh/ssh\_host\_ed25519\_key -N ‘’
 
+```
 <span id="anchor-38"></span><span id="anchor-39"></span><span id="anchor-38"></span>Set up nano
 -----------------------------------------------------------------------------------------------
 
+```
 su user1
 
 cd ~
@@ -289,10 +301,12 @@ nano ~/.nanorc
 set nowrap
 
 set rebindkeypad
+```
 
 <span id="anchor-40"></span><span id="anchor-41"></span><span id="anchor-40"></span>Generate client keys
 --------------------------------------------------------------------------------------------------------
 
+```
 su user1
 
 cd ~
@@ -314,13 +328,17 @@ cat ~/.ssh/putty-myhostname\_rsa &gt;&gt; ~/.ssh/authorized\_keys
 cat ~/.ssh/cygwin-myhostname\_ed25519 &gt;&gt; ~/.ssh/authorized\_keys
 
 cat ~/.ssh/thor-myhostname\_ed25519 &gt;&gt; ~/.ssh/authorized\_keys
+```
 
 Copy, or better move (=copy and delete the original) private keys (e. g. ts-myhostname\_rsa without .pub extension) from the server to the clients in a secure manner (e. g. via scp, sftp, or simply copy the contents of the file via the clipboard). Even better, create the keys on the client and only copy the public key into the server user’s authorized\_keys file. After that exit from the su user1 session:
 
+```
 exit
+```
 
 *Alternatively* to su-ing into the user1 account, you could
 
+```
 ssh-keygen -t rsa -b 4096 -C “ts-user1-myhostname” -f ~/.ssh/user1/ts-myhostname\_rsa
 
 ssh-keygen -t rsa -b 4096 -C “putty-user1-myhostname” -f ~/.ssh/user1/putty-myhostname\_rsa
@@ -350,6 +368,7 @@ chmod 0600 /home/user1/.ssh/\*
 chmod 0644 /home/user1/.ssh/\*.pub
 
 chmod 0644 /home/user1/authorized\_keys
+```
 
 <span id="anchor-42"></span><span id="anchor-43"></span><span id="anchor-42"></span>Configure sshd
 --------------------------------------------------------------------------------------------------
@@ -358,39 +377,46 @@ chmod 0644 /home/user1/authorized\_keys
 
 Prepare a copy of the original configuration file:
 
+```
 cp /etc/ssh/sshd\_config /etc/ssh/sshd\_config.orig
+```
 
 ### <span id="anchor-45"></span>Create a revoke script
 
+```
 nano /root/sshdconfig-revoke.sh
+```
 
-\#!/bin/bash
+```
+#!/bin/bash
 
 mv /etc/ssh/sshd\_config /etc/ssh/sshd\_config.old
 
 cp /etc/ssh/sshd\_config.orig /etc/ssh/sshd\_config
 
 systemctl restart sshd
+```
 
 ### <span id="anchor-46"></span>Change sshd\_config
 
 After that, change */etc/ssh/sshd\_config* according to this:
 
+```
 Port 1022
 
 AddressFamily inet \# ipv4 only
 
 HostKey /etc/ssh/ssh\_host\_rsa\_key
 
-\#HostKey /etc/ssh/ssh\_host\_dsa\_key
+#HostKey /etc/ssh/ssh\_host\_dsa\_key
 
-\#HostKey /etc/ssh/ssh\_host\_ecdsa\_key
+#HostKey /etc/ssh/ssh\_host\_ecdsa\_key
 
 HostKey /etc/ssh/ssh\_host\_ed25519\_key
 
 AllowUsers user1 l0g1nb4ck00p root
 
-PermitRootLogin yes \# because publickey,KEYBOARD-INTERACTIVE
+PermitRootLogin yes # because publickey,KEYBOARD-INTERACTIVE
 
 PubkeyAuthentication yes
 
@@ -400,11 +426,11 @@ IgnoreRhosts yes
 
 HostbasedAuthentication no
 
-\#\#\# in order to find the Ciphers, run ssh -Q cipher
+### in order to find the Ciphers, run ssh -Q cipher
 
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
 
-\#\#\# in order to find the MACs, run ssh -Q mac
+### in order to find the MACs, run ssh -Q mac
 
 MACs hmac-sha2-512-etm@openssh.com,[**hmac-sha2-256-etm@openssh.com**](mailto:hmac-sha2-256-etm@openssh.com),hmac-sha2-512,hmac-sha2-256
 
@@ -414,23 +440,24 @@ AuthenticationMethods publickey,keyboard-interactive
 
 Match User l0g1nb4ck00p
 
- \# only password
+# only password
 
  AuthenticationMethods keyboard-interactive
 
 Match User user1
 
- \# only SSH certificate
+ # only SSH certificate
 
  AuthenticationMethods publickey
 
 Match User root
 
- \# SSH certificate and password
+ # SSH certificate and password
 
  AuthenticationMethods publickey,keyboard-interactive
 
 systemctl restart sshd
+```
 
 Logout from one session and try to login again with your ssh identity and correct port number.
 
@@ -441,37 +468,46 @@ Read *journalctl -u sshd* for details.
 
 Once in a while, **on your client(s), **you might hash the file which stores the known hosts (*~/.ssh/known\_hosts*), so that the real host names or IP addresses will be encrypted.
 
+```
 ssh-keygen -H
 
-rm ~/.ssh/known\_hosts.old
+rm ~/.ssh/known_hosts.old
+```
 
 If you wanted to do that automatically, **on your client(s)**, you could
 
-nano /etc/ssh/ssh\_config
+```
+nano /etc/ssh/ssh_config
 
 HashKnownHosts yes
+```
 
 or, in your local *~/.ssh/config* file
 
+```
 nano ~/.ssh/config
 
 HashKnownHosts yes
+```
 
 <span id="anchor-49"></span><span id="anchor-50"></span><span id="anchor-49"></span>Install knockd
 --------------------------------------------------------------------------------------------------
 
+```
 pacman -S knockd
+```
 
 <span id="anchor-51"></span><span id="anchor-52"></span><span id="anchor-51"></span>Configure knockd
 ----------------------------------------------------------------------------------------------------
 
 ### <span id="anchor-53"></span><span id="anchor-54"></span><span id="anchor-53"></span>/etc/knockd.conf
 
-\[options\]
+```
+[options]
 
  logfile = /var/log/knockd.log
 
-\[opencloseSSH\]
+[opencloseSSH]
 
  sequence = 7000,8080,9060,12345
 
@@ -479,82 +515,100 @@ pacman -S knockd
 
  tcpflags = syn
 
- start\_command = /root/knockd-open.sh **%IP%**
+ start_command = /root/knockd-open.sh %IP%
 
- cmd\_timeout = 30
+ cmd_timeout = 30
 
- stop\_command = /root/knockd-close.sh **%IP%**
+ stop_command = /root/knockd-close.sh %IP%
+```
 
 Eventually, you might add a new section to disable iptables, to reboot, …, e. g.
 
-\[revokeiptables\]
+```
+[revokeiptables]
 
 sequence=12345,8080,9060,7000
 
-seq\_timeout=15
+seq_timeout=15
 
 tcpflags=syn
 
 command=/root/iptables-revoke.sh
 
-\[revokesshdconfig\]
+[revokesshdconfig]
 
 sequence=12321,8181,9050,7001
 
-seq\_timeout=15
+seq_timeout=15
 
 tcpflags=syn
 
-command=/root/sshdconfig-revok<span id="anchor-55"></span>command=/root/sshdconfig-revoke.sh
+command=/root/sshdconfig-revoke.sh
+```
 
 ### <span id="anchor-56"></span><span id="anchor-57"></span><span id="anchor-56"></span>/root/knockd-open.sh
 
 correct the port numbers, if your SSHd does not listen to port 1022
 
-\#!/bin/bash
+```
+#!/bin/bash
 
 /sbin/iptables -I INPUT -s $1 -p tcp --dport 1022 -j ACCEPT
 
 /sbin/iptables -I OUTPUT -d $1 -p tcp --sport 1022 -j ACCEPT
+```
 
 and make the script executable
 
+```
 chmod +x knockd-open.sh
+```
 
 ### <span id="anchor-58"></span><span id="anchor-59"></span><span id="anchor-58"></span>/root/knockd-close.sh
 
 be sure to use the same commands as in */root/knockd-open.sh*, but with ***-D*** instead of -I (e. g. copy the file into a different name (*knockd-close.sh*) and replace -I with -D):
 
-\#!/bin/bash
+```
+#!/bin/bash
 
 /sbin/iptables -D INPUT -s $1 -p tcp --dport 1022 -j ACCEPT
 
 /sbin/iptables -D OUTPUT -d $1 -p tcp --sport 1022 -j ACCEPT
+```
 
 and make the script executable
 
+```
 chmod +x knockd-close.sh
+```
 
 ### <span id="anchor-60"></span><span id="anchor-61"></span><span id="anchor-60"></span>Test knockd
 
 Keep logged in to at least one SSH session. Start *knockd* with
 
+```
 systemctl start knockd
+```
 
 View the logfile with
 
+```
 tail -f /var/log/knockd.log
+```
 
 Knock on your system from outside and observe the log.
 
 Stop the log view with *&lt;ctrl-c&gt;* and, within 30 seconds (cmd\_timeout), have a look at iptables with
 
+```
 iptables -S
+```
 
 Do your find the entries?
 
 After that, still logged in to SSH, tailor iptables in a way that you only can login after knocking, e. g.
 
+```
 at now + 5 minutes
 
 /root/iptables-revoke.sh
@@ -598,11 +652,13 @@ iptables -S, “unknocked”:
 -A OUTPUT -p tcp -m state --state RELATED,ESTABLISHED -m tcp --sport 1022 -j ACCEPT
 
 -A OUTPUT -o lo -j ACCEPT
+```
 
 Now try to login via SSH. It should not work. Knock, and try to login via SSH again.
 
 Iptables -S, “knocked open”:
 
+```
 -P INPUT DROP
 
 -P FORWARD DROP
@@ -622,26 +678,30 @@ Iptables -S, “knocked open”:
 -A OUTPUT -p tcp -m state --state RELATED,ESTABLISHED -m tcp --sport 1022 -j ACCEPT
 
 -A OUTPUT -o lo -j ACCEPT
+```
 
 Wait until knock has deleted the iptables after 30 seconds again, and save the iptables:
 
-iptables-save &gt; /etc/iptables/iptables.rules
+```
+iptables-save > /etc/iptables/iptables.rules
+```
 
 <span id="anchor-62"></span><span id="anchor-63"></span><span id="anchor-62"></span>openvpn
 ===========================================================================================
 
 <span id="anchor-64"></span><span id="anchor-65"></span><span id="anchor-64"></span>Install openvpn and easy-rsa
 ----------------------------------------------------------------------------------------------------------------
-
+```
 pacman -S openvpn easy-rsa
 
 cp -r /usr/share/easy-rsa/ /etc/openvpn/easy-rsa
-
+```
 <span id="anchor-66"></span><span id="anchor-67"></span><span id="anchor-66"></span>Generate keys, certificates and parameters
 ------------------------------------------------------------------------------------------------------------------------------
 
 see [**https://wiki.archlinux.org/index.php/OpenVPN\_Checklist\_Guide**](https://wiki.archlinux.org/index.php/OpenVPN_Checklist_Guide) for general procedure.
 
+```
 cd /etc/openvpn/easy-rsa
 
 nano vars
@@ -659,14 +719,17 @@ source ./vars
 ./build-dh
 
 ./build-key-pass client1
+```
 
 For additional security, use *./build-key-**pass** &lt;client1&gt;* instead of *./build-key &lt;client1&gt;*
 
 Also, create a TLS-Authentication key:
 
+```
 cd /etc/openvpn/easy-rsa/keys
 
 openvpn --genkey --secret ta.key
+```
 
 <span id="anchor-68"></span><span id="anchor-69"></span><span id="anchor-68"></span>Configure openvpn server
 ------------------------------------------------------------------------------------------------------------
@@ -674,14 +737,15 @@ openvpn --genkey --secret ta.key
 Save the below configuration e. g. as */etc/openvpn/server.conf*. Remember the name, you will need it later to start openvpn.
 
 Why proto tcp? Because, if you want to access openvpn via tor, you must use tcp, because tor does not support udp.
+```
 
-\# hardened openvpn-config
+# hardened openvpn-config
 
-\# server
+# server
 
-\# useradd --system --shell /usr/sbin/nologin --no-create-home openvpn\_server
+# useradd --system --shell /usr/sbin/nologin --no-create-home openvpn\_server
 
-;user openvpn\_server
+;user openvpn_server
 
 ;group nogroup
 
@@ -736,6 +800,7 @@ log /var/log/openvpn.log
 status openvpn-status.log
 
 verb 4
+```
 
 <span id="anchor-70"></span><span id="anchor-71"></span><span id="anchor-70"></span>Distribute Certificates and Keys
 --------------------------------------------------------------------------------------------------------------------
@@ -746,10 +811,10 @@ Distribute *ca.crt, client1.key, client1.crt, ta.key* to the clients in a secure
 ---------------------------------------------------------------------------------------------------------
 
 ### <span id="anchor-74"></span><span id="anchor-75"></span><span id="anchor-74"></span>Configure a linux client
+```
+# hardened openvpn-config
 
-\# hardened openvpn-config
-
-\# client (linux)
+# client (linux)
 
 client
 
@@ -761,7 +826,7 @@ persist-key
 
 persist-tun
 
-\# route from openvpn-client to its local network
+# route from openvpn-client to its local network
 
 route 192.168.1.0 255.255.255.0 192.168.1.1
 
@@ -798,12 +863,13 @@ log /var/log/openvpn.log
 status openvpn-status.log
 
 verb 4
+```
 
 ### <span id="anchor-76"></span><span id="anchor-77"></span><span id="anchor-76"></span>Configure an iphone
+```
+# hardened openvpn-config
 
-\# hardened openvpn-config
-
-\# client (iphone)
+# client (iphone)
 
 client
 
@@ -815,7 +881,7 @@ persist-key
 
 persist-tun
 
-\# route from openvpn-client to its local network
+# route from openvpn-client to its local network
 
 route 192.168.1.0 255.255.255.0 192.168.1.1
 
@@ -845,7 +911,7 @@ status openvpn-status.log
 
 verb 4
 
-&lt;ca&gt;
+<ca>
 
 -----BEGIN CERTIFICATE-----
 
@@ -857,9 +923,9 @@ DX5xP1/7GS9cBQNwCpLUsUQfNXGvIJ4uMWY0Bw5BVqAmCoOnlpU=
 
 -----END CERTIFICATE-----
 
-&lt;/ca&gt;
+</ca>
 
-&lt;cert&gt;
+<cert>
 
 -----BEGIN CERTIFICATE-----
 
@@ -873,9 +939,9 @@ TrAX
 
 -----END CERTIFICATE-----
 
-&lt;/cert&gt;
+</cert>
 
-&lt;key&gt;
+<key>
 
 -----BEGIN PRIVATE KEY-----
 
@@ -887,11 +953,11 @@ MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDHvvQKA4DPx3Tr
 
 -----END PRIVATE KEY-----
 
-&lt;/key&gt;
+</key>
 
 key-direction 1
 
-&lt;tls-auth&gt;
+<tls-auth>
 
 -----BEGIN OpenVPN Static key V1-----
 
@@ -899,15 +965,19 @@ key-direction 1
 
 -----END OpenVPN Static key V1-----
 
-&lt;/tls-auth&gt;
+</tls-auth>
+```
 
 In case this iphone configuration does not work with your password-protected, private key, do
 
+```
 openssl rsa -in Client1.key -des3 -out Client1.3des.key
+```
 
 and paste the contents of the *Client1.3des.key* into the *&lt;key&gt;* section:
 
-&lt;key&gt;
+```
+<key>
 
 -----BEGIN RSA PRIVATE KEY-----
 
@@ -923,7 +993,8 @@ R0T13Om/N3Y6TJSBdd1d62asdfvn1SN5lnh54cr+ix5GasdfasdFK5+z8m2UZ1sI
 
 -----END RSA PRIVATE KEY-----
 
-&lt;/key&gt;
+</key>
+```
 
 (*https://forums.openvpn.net/viewtopic.php?t=18170\#p49855*)
 
